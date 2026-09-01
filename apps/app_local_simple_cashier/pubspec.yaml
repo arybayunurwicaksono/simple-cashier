@@ -1,0 +1,43 @@
+name: app_local_simple_cashier
+description: Offline-First Local Goods and Services Cashier App.
+version: 1.0.0+1
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+  flutter: ">=3.0.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Shared Monorepo Packages
+  core:
+    path: ../../packages/core
+  database:
+    path: ../../packages/database
+  ui:
+    path: ../../packages/ui
+  thermal_printer:
+    path: ../../packages/thermal_printer
+
+  # State Management & DI
+  mobx: ^2.3.3+2
+  flutter_mobx: ^2.2.1+1
+  get_it: ^7.7.0
+  image_picker: ^1.1.2
+  shared_preferences: ^2.2.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  mobx_codegen: ^2.6.1+1
+  build_runner: ^2.4.9
+
+flutter:
+  uses-material-design: true

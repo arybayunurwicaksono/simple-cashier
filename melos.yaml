@@ -1,0 +1,39 @@
+name: simple_cashier_workspace
+repository: https://github.com/dgc16/simple-cashier-app
+
+packages:
+  - apps/*
+  - packages/*
+
+command:
+  bootstrap:
+    usePubspecOverrides: true
+
+scripts:
+  analyze:
+    exec: flutter analyze .
+    description: Run flutter analyze across all packages and apps.
+
+  test:
+    exec: flutter test
+    description: Run flutter test in all packages with test suite.
+    packageFilters:
+      dirExists: test
+
+  codegen:
+    exec: dart run build_runner build --delete-conflicting-outputs
+    description: Run build_runner code generation across all packages with build_runner.
+    packageFilters:
+      dependsOn:
+        - build_runner
+
+  codegen:watch:
+    exec: dart run build_runner watch --delete-conflicting-outputs
+    description: Run build_runner watch mode.
+    packageFilters:
+      dependsOn:
+        - build_runner
+
+  clean:
+    exec: flutter clean
+    description: Clean build cache in all apps and packages.

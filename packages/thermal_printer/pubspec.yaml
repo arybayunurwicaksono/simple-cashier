@@ -1,0 +1,22 @@
+name: thermal_printer
+description: Hardware Bluetooth thermal printer service and ESC/POS generator.
+version: 1.0.0
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+  flutter: ">=3.0.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  print_bluetooth_thermal: ^1.1.1
+  esc_pos_utils_plus: ^2.0.3
+  permission_handler: ^11.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0

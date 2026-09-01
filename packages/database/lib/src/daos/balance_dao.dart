@@ -1,0 +1,47 @@
+import 'package:drift/drift.dart';
+import '../app_database.dart';
+import '../tables/balance_logs_table.dart';
+
+part 'balance_dao.g.dart';
+
+@DriftAccessor(tables: [BalanceLogs])
+class BalanceDao extends DatabaseAccessor<AppDatabase> with _$BalanceDaoMixin {
+  BalanceDao(super.db);
+
+  Stream<List<BalanceLogData>> watchAllBalanceLogs() =>
+      (select(balanceLogs)..orderBy([(tbl) => OrderingTerm.desc(tbl.id)])).watch();
+
+  Future<List<BalanceLogData>> getAllBalanceLogs() =>
+      (select(balanceLogs)..orderBy([(tbl) => OrderingTerm.desc(tbl.id)])).get();
+
+  Future<int> insertBalanceLog(BalanceLogsCompanion log) =>
+      into(balanceLogs).insert(log);
+
+  /// Calculates current cash balance (Inflow - Outflow)
+  Future<int> getCashBalance() async {
+    final logs = await (select(balanceLogs)..where((tbl) => tbl.paymentType.equals('cash'))).get();
+    int balance = 0;
+    for (final l in logs) {
+      if (l.flowType == 'in') {
+        balance += l.amount;
+      } else {
+        balance -= l.amount;
+      }
+    }
+    return balance;
+  }
+
+  /// Calculates current digital balance (Inflow - Outflow)
+  Future<int> getDigitalBalance() async {
+    final logs = await (select(balanceLogs)..where((tbl) => tbl.paymentType.equals('digital'))).get();
+    int balance = 0;
+    for (final l in logs) {
+      if (l.flowType == 'in') {
+        balance += l.amount;
+      } else {
+        balance -= l.amount;
+      }
+    }
+    return balance;
+  }
+}
