@@ -8,18 +8,26 @@ part 'category_dao.g.dart';
 class CategoryDao extends DatabaseAccessor<AppDatabase> with _$CategoryDaoMixin {
   CategoryDao(super.db);
 
-  Future<List<CategoryData>> getAllCategories([String? type]) {
+  Future<List<CategoryData>> getAllCategories([String? type, int? storeId]) {
+    final query = select(categories);
     if (type != null) {
-      return (select(categories)..where((tbl) => tbl.type.equals(type))).get();
+      query.where((tbl) => tbl.type.equals(type));
     }
-    return select(categories).get();
+    if (storeId != null) {
+      query.where((tbl) => tbl.storeId.equals(storeId));
+    }
+    return query.get();
   }
 
-  Stream<List<CategoryData>> watchAllCategories([String? type]) {
+  Stream<List<CategoryData>> watchAllCategories([String? type, int? storeId]) {
+    final query = select(categories);
     if (type != null) {
-      return (select(categories)..where((tbl) => tbl.type.equals(type))).watch();
+      query.where((tbl) => tbl.type.equals(type));
     }
-    return select(categories).watch();
+    if (storeId != null) {
+      query.where((tbl) => tbl.storeId.equals(storeId));
+    }
+    return query.watch();
   }
 
   Future<int> insertCategory(CategoriesCompanion category) =>

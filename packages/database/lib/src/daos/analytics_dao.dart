@@ -26,16 +26,23 @@ class AnalyticsDao extends DatabaseAccessor<AppDatabase> with _$AnalyticsDaoMixi
     required DateTime startDate,
     required DateTime endDate,
     required String interval, // 'yearly' | 'monthly' | 'weekly'
+    int? storeId,
   }) async {
-    final txList = await (select(transactions)
-          ..where((tbl) => tbl.createdAt.isBetweenValues(startDate, endDate)))
-        .get();
+    final txQuery = select(transactions)
+      ..where((tbl) => tbl.createdAt.isBetweenValues(startDate, endDate));
+    if (storeId != null) {
+      txQuery.where((tbl) => tbl.storeId.equals(storeId));
+    }
+    final txList = await txQuery.get();
 
-    final expenseLogs = await (select(balanceLogs)
-          ..where((tbl) =>
-              tbl.createdAt.isBetweenValues(startDate, endDate) &
-              tbl.flowType.equals('out')))
-        .get();
+    final expenseQuery = select(balanceLogs)
+      ..where((tbl) =>
+          tbl.createdAt.isBetweenValues(startDate, endDate) &
+          tbl.flowType.equals('out'));
+    if (storeId != null) {
+      expenseQuery.where((tbl) => tbl.storeId.equals(storeId));
+    }
+    final expenseLogs = await expenseQuery.get();
 
     if (interval == 'yearly') {
       final months = [
@@ -148,6 +155,7 @@ class AnalyticsDao extends DatabaseAccessor<AppDatabase> with _$AnalyticsDaoMixi
   Future<StockMovementSummary> getStockMovement({
     required DateTime startDate,
     required DateTime endDate,
+    int? storeId,
   }) async {
     final restockList = await (select(restocks)
           ..where((tbl) => tbl.restockDate.isBetweenValues(startDate, endDate)))
@@ -160,9 +168,12 @@ class AnalyticsDao extends DatabaseAccessor<AppDatabase> with _$AnalyticsDaoMixi
       totalRestockCost += r.totalPurchaseCost;
     }
 
-    final txList = await (select(transactions)
-          ..where((tbl) => tbl.createdAt.isBetweenValues(startDate, endDate)))
-        .get();
+    final txQuery = select(transactions)
+      ..where((tbl) => tbl.createdAt.isBetweenValues(startDate, endDate));
+    if (storeId != null) {
+      txQuery.where((tbl) => tbl.storeId.equals(storeId));
+    }
+    final txList = await txQuery.get();
 
     final txIds = txList.map((t) => t.id).toList();
 
@@ -196,10 +207,14 @@ class AnalyticsDao extends DatabaseAccessor<AppDatabase> with _$AnalyticsDaoMixi
     required DateTime startDate,
     required DateTime endDate,
     required String interval,
+    int? storeId,
   }) async {
-    final txList = await (select(transactions)
-          ..where((tbl) => tbl.createdAt.isBetweenValues(startDate, endDate)))
-        .get();
+    final txQuery = select(transactions)
+      ..where((tbl) => tbl.createdAt.isBetweenValues(startDate, endDate));
+    if (storeId != null) {
+      txQuery.where((tbl) => tbl.storeId.equals(storeId));
+    }
+    final txList = await txQuery.get();
 
     final txIds = txList.map((t) => t.id).toList();
 
@@ -314,16 +329,23 @@ class AnalyticsDao extends DatabaseAccessor<AppDatabase> with _$AnalyticsDaoMixi
     required DateTime endDate,
     DateTime? previousStartDate,
     DateTime? previousEndDate,
+    int? storeId,
   }) async {
-    final currentTx = await (select(transactions)
-          ..where((tbl) => tbl.createdAt.isBetweenValues(startDate, endDate)))
-        .get();
+    final curTxQuery = select(transactions)
+      ..where((tbl) => tbl.createdAt.isBetweenValues(startDate, endDate));
+    if (storeId != null) {
+      curTxQuery.where((tbl) => tbl.storeId.equals(storeId));
+    }
+    final currentTx = await curTxQuery.get();
 
-    final currentExpenses = await (select(balanceLogs)
-          ..where((tbl) =>
-              tbl.createdAt.isBetweenValues(startDate, endDate) &
-              tbl.flowType.equals('out')))
-        .get();
+    final curExpQuery = select(balanceLogs)
+      ..where((tbl) =>
+          tbl.createdAt.isBetweenValues(startDate, endDate) &
+          tbl.flowType.equals('out'));
+    if (storeId != null) {
+      curExpQuery.where((tbl) => tbl.storeId.equals(storeId));
+    }
+    final currentExpenses = await curExpQuery.get();
 
     int grossRevenue = 0;
     int grossProfit = 0;
@@ -342,14 +364,21 @@ class AnalyticsDao extends DatabaseAccessor<AppDatabase> with _$AnalyticsDaoMixi
     // Previous period for growth comparison
     double growth = 0.0;
     if (previousStartDate != null && previousEndDate != null) {
-      final prevTx = await (select(transactions)
-            ..where((tbl) => tbl.createdAt.isBetweenValues(previousStartDate, previousEndDate)))
-          .get();
-      final prevExpenses = await (select(balanceLogs)
-            ..where((tbl) =>
-                tbl.createdAt.isBetweenValues(previousStartDate, previousEndDate) &
-                tbl.flowType.equals('out')))
-          .get();
+      final prevTxQuery = select(transactions)
+        ..where((tbl) => tbl.createdAt.isBetweenValues(previousStartDate, previousEndDate));
+      if (storeId != null) {
+        prevTxQuery.where((tbl) => tbl.storeId.equals(storeId));
+      }
+      final prevTx = await prevTxQuery.get();
+
+      final prevExpQuery = select(balanceLogs)
+        ..where((tbl) =>
+            tbl.createdAt.isBetweenValues(previousStartDate, previousEndDate) &
+            tbl.flowType.equals('out'));
+      if (storeId != null) {
+        prevExpQuery.where((tbl) => tbl.storeId.equals(storeId));
+      }
+      final prevExpenses = await prevExpQuery.get();
 
       int prevGrossProfit = 0;
       for (final tx in prevTx) {

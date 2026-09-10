@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 import 'package:core/core.dart';
 
 class SplineAreaChart extends StatelessWidget {
@@ -9,16 +10,18 @@ class SplineAreaChart extends StatelessWidget {
   final int serviceRevenue;
   final double growthPercentage;
   final List<ChartDataPoint> trendPoints;
+  final bool showHeader;
 
   const SplineAreaChart({
     super.key,
-    required this.title,
+    this.title = 'Omset Penjualan (Uang Masuk)',
     this.subtitle = '',
     required this.totalRevenue,
     required this.productRevenue,
     required this.serviceRevenue,
     this.growthPercentage = 0.0,
     required this.trendPoints,
+    this.showHeader = true,
   });
 
   @override
@@ -46,74 +49,75 @@ class SplineAreaChart extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header: Title & Ratio Pill
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary(context),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (subtitle.isNotEmpty) ...[
-                      const SizedBox(height: 2),
+          if (showHeader) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        subtitle,
+                        title,
                         style: TextStyle(
-                          fontSize: 11.5,
-                          color: AppColors.textSecondary(context),
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary(context),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
+                      if (subtitle.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: AppColors.textSecondary(context),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ],
-                  ],
-                ),
-              ),
-
-              const SizedBox(width: 8),
-
-              // Ratio Pill (Barang vs Jasa)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.chartTrack(context),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: AppColors.chartBorder(context),
                   ),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.shopping_bag_outlined, size: 12, color: AppColors.accentBlue),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${totalRevenue > 0 ? ((productRevenue / totalRevenue) * 100).toInt() : 50}%',
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.accentBlue),
-                    ),
-                    Text(' : ', style: TextStyle(fontSize: 11, color: AppColors.textMuted(context))),
-                    const Icon(Icons.build_circle_outlined, size: 12, color: AppColors.accentGreen),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${totalRevenue > 0 ? ((serviceRevenue / totalRevenue) * 100).toInt() : 50}%',
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.accentGreen),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
 
-          const SizedBox(height: 14),
+                const SizedBox(width: 8),
+
+                // Ratio Pill (Barang vs Jasa)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.chartTrack(context),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: AppColors.chartBorder(context),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.shopping_bag_outlined, size: 12, color: AppColors.accentBlue),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${totalRevenue > 0 ? ((productRevenue / totalRevenue) * 100).toInt() : 50}%',
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.accentBlue),
+                      ),
+                      Text(' : ', style: TextStyle(fontSize: 11, color: AppColors.textMuted(context))),
+                      const Icon(Icons.build_circle_outlined, size: 12, color: AppColors.accentGreen),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${totalRevenue > 0 ? ((serviceRevenue / totalRevenue) * 100).toInt() : 50}%',
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.accentGreen),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+          ],
 
           // Total Badge & Growth Pill Card
           Container(

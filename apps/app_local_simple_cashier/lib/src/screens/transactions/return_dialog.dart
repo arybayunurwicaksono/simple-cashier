@@ -86,6 +86,7 @@ class _ReturnDialogState extends State<ReturnDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Theme.of(context).cardColor,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(18),
@@ -116,26 +117,51 @@ class _ReturnDialogState extends State<ReturnDialog> {
               maxLines: 2,
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: AppButton(
-                    label: 'Batal',
-                    variant: AppButtonVariant.outline,
-                    height: 40,
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: AppButton(
-                    label: 'Proses Retur',
-                    variant: AppButtonVariant.danger,
-                    height: 40,
-                    onPressed: _handleProcessReturn,
-                  ),
-                ),
-              ],
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isNarrow = constraints.maxWidth < 240;
+                if (isNarrow) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      AppButton(
+                        label: 'Proses Retur',
+                        variant: AppButtonVariant.danger,
+                        height: 40,
+                        onPressed: _handleProcessReturn,
+                      ),
+                      const SizedBox(height: 8),
+                      AppButton(
+                        label: 'Batal',
+                        variant: AppButtonVariant.outline,
+                        height: 40,
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(
+                      child: AppButton(
+                        label: 'Batal',
+                        variant: AppButtonVariant.outline,
+                        height: 40,
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: AppButton(
+                        label: 'Proses Retur',
+                        variant: AppButtonVariant.danger,
+                        height: 40,
+                        onPressed: _handleProcessReturn,
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ],
         ),

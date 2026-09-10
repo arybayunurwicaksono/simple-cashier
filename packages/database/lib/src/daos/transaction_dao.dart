@@ -13,11 +13,21 @@ part 'transaction_dao.g.dart';
 class TransactionDao extends DatabaseAccessor<AppDatabase> with _$TransactionDaoMixin {
   TransactionDao(super.db);
 
-  Stream<List<TransactionData>> watchAllTransactions() =>
-      (select(transactions)..orderBy([(tbl) => OrderingTerm.desc(tbl.id)])).watch();
+  Stream<List<TransactionData>> watchAllTransactions({int? storeId}) {
+    final query = select(transactions);
+    if (storeId != null) {
+      query.where((tbl) => tbl.storeId.equals(storeId));
+    }
+    return (query..orderBy([(tbl) => OrderingTerm.desc(tbl.id)])).watch();
+  }
 
-  Future<List<TransactionData>> getAllTransactions() =>
-      (select(transactions)..orderBy([(tbl) => OrderingTerm.desc(tbl.id)])).get();
+  Future<List<TransactionData>> getAllTransactions({int? storeId}) {
+    final query = select(transactions);
+    if (storeId != null) {
+      query.where((tbl) => tbl.storeId.equals(storeId));
+    }
+    return (query..orderBy([(tbl) => OrderingTerm.desc(tbl.id)])).get();
+  }
 
   Future<TransactionWithItems?> getTransactionWithItems(int transactionId) async {
     final transactionRow = await (select(transactions)
@@ -132,5 +142,31 @@ class TransactionDao extends DatabaseAccessor<AppDatabase> with _$TransactionDao
         }
       }
     });
+  }
+
+  Stream<List<TransactionData>> watchTransactionsByUser(int userId, {int? storeId}) {
+    final query = select(transactions)..where((tbl) => tbl.userId.equals(userId));
+    if (storeId != null) {
+      query.where((tbl) => tbl.storeId.equals(storeId));
+    }
+    return (query..orderBy([(tbl) => OrderingTerm.desc(tbl.id)])).watch();
+  }
+
+  Future<List<TransactionData>> getTransactionsByUser(int userId, {int? storeId}) {
+    final query = select(transactions)..where((tbl) => tbl.userId.equals(userId));
+    if (storeId != null) {
+      query.where((tbl) => tbl.storeId.equals(storeId));
+    }
+    return (query..orderBy([(tbl) => OrderingTerm.desc(tbl.id)])).get();
+  }
+
+  Stream<List<ReturnData>> watchReturnsByUser(int userId) {
+    final query = select(returns)..where((tbl) => tbl.userId.equals(userId));
+    return (query..orderBy([(tbl) => OrderingTerm.desc(tbl.id)])).watch();
+  }
+
+  Future<List<ReturnData>> getReturnsByUser(int userId) {
+    final query = select(returns)..where((tbl) => tbl.userId.equals(userId));
+    return (query..orderBy([(tbl) => OrderingTerm.desc(tbl.id)])).get();
   }
 }

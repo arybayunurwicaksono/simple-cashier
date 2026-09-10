@@ -22,4 +22,22 @@ class PasswordHasher {
     final calculatedHash = hashPassword(inputPassword, storedSalt);
     return calculatedHash == storedHash;
   }
+
+  /// Hashes a numeric PIN with salt
+  static String hashPin(String pin, String salt) => hashPassword(pin, salt);
+
+  /// Verifies if a given PIN matches stored hash and salt
+  static bool verifyPin(String inputPin, String storedHash, String storedSalt) =>
+      verifyPassword(inputPin, storedHash, storedSalt);
+
+  /// Normalizes a security answer (lowercase and trimmed)
+  static String normalizeSecurityAnswer(String answer) => answer.trim().toLowerCase();
+
+  /// Hashes a normalized security answer with salt
+  static String hashSecurityAnswer(String answer, String salt) =>
+      hashPassword(normalizeSecurityAnswer(answer), salt);
+
+  /// Verifies if a security answer matches stored hash and salt
+  static bool verifySecurityAnswer(String inputAnswer, String storedHash, String storedSalt) =>
+      verifyPassword(normalizeSecurityAnswer(inputAnswer), storedHash, storedSalt);
 }

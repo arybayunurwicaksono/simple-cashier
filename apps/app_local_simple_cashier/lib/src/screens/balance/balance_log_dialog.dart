@@ -78,6 +78,7 @@ class _BalanceLogDialogState extends State<BalanceLogDialog> {
 
     return Dialog(
       backgroundColor: Theme.of(context).cardColor,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(18),
@@ -110,14 +111,17 @@ class _BalanceLogDialogState extends State<BalanceLogDialog> {
                           ),
                         ),
                         child: Center(
-                          child: Text(
-                            'Pemasukan (Masuk)',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: _flowType == 'in'
-                                  ? (isDark ? const Color(0xFF6EE7B7) : AppColors.success)
-                                  : AppColors.textSecondary(context),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              'Pemasukan (Masuk)',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: _flowType == 'in'
+                                    ? (isDark ? const Color(0xFF6EE7B7) : AppColors.success)
+                                    : AppColors.textSecondary(context),
+                              ),
                             ),
                           ),
                         ),
@@ -142,14 +146,17 @@ class _BalanceLogDialogState extends State<BalanceLogDialog> {
                           ),
                         ),
                         child: Center(
-                          child: Text(
-                            'Pengeluaran (Keluar)',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: _flowType == 'out'
-                                  ? (isDark ? const Color(0xFFFCA5A5) : AppColors.error)
-                                  : AppColors.textSecondary(context),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              'Pengeluaran (Keluar)',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: _flowType == 'out'
+                                    ? (isDark ? const Color(0xFFFCA5A5) : AppColors.error)
+                                    : AppColors.textSecondary(context),
+                              ),
                             ),
                           ),
                         ),
@@ -256,25 +263,49 @@ class _BalanceLogDialogState extends State<BalanceLogDialog> {
               ),
               const SizedBox(height: 16),
 
-              Row(
-                children: [
-                  Expanded(
-                    child: AppButton(
-                      label: 'Batal',
-                      variant: AppButtonVariant.outline,
-                      height: 40,
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: AppButton(
-                      label: 'Simpan',
-                      height: 40,
-                      onPressed: _handleSave,
-                    ),
-                  ),
-                ],
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isNarrow = constraints.maxWidth < 220;
+                  if (isNarrow) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        AppButton(
+                          label: 'Simpan',
+                          height: 40,
+                          onPressed: _handleSave,
+                        ),
+                        const SizedBox(height: 8),
+                        AppButton(
+                          label: 'Batal',
+                          variant: AppButtonVariant.outline,
+                          height: 40,
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    );
+                  }
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: AppButton(
+                          label: 'Batal',
+                          variant: AppButtonVariant.outline,
+                          height: 40,
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: AppButton(
+                          label: 'Simpan',
+                          height: 40,
+                          onPressed: _handleSave,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ],
           ),

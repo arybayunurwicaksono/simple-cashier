@@ -33,4 +33,34 @@ class UserDao extends DatabaseAccessor<AppDatabase> with _$UserDaoMixin {
     final query = selectOnly(users)..addColumns([countExp]);
     return await query.map((row) => row.read(countExp)).getSingle() ?? 0;
   }
+
+  Future<bool> updateUserPassword({
+    required int userId,
+    required String newPasswordHash,
+    required String newSalt,
+  }) async {
+    final count = await (update(users)..where((tbl) => tbl.id.equals(userId))).write(
+      UsersCompanion(
+        passwordHash: Value(newPasswordHash),
+        salt: Value(newSalt),
+      ),
+    );
+    return count > 0;
+  }
+
+  Future<bool> updateUserProfile({
+    required int userId,
+    required String fullname,
+    required String email,
+    required String role,
+  }) async {
+    final count = await (update(users)..where((tbl) => tbl.id.equals(userId))).write(
+      UsersCompanion(
+        fullname: Value(fullname),
+        email: Value(email),
+        role: Value(role),
+      ),
+    );
+    return count > 0;
+  }
 }

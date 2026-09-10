@@ -4,6 +4,7 @@ part of 'accounting_dao.dart';
 
 // ignore_for_file: type=lint
 mixin _$AccountingDaoMixin on DatabaseAccessor<AppDatabase> {
+  $StoresTable get stores => attachedDatabase.stores;
   $UsersTable get users => attachedDatabase.users;
   $MonthlyAccountingTable get monthlyAccounting =>
       attachedDatabase.monthlyAccounting;
@@ -20,6 +21,8 @@ mixin _$AccountingDaoMixin on DatabaseAccessor<AppDatabase> {
 class AccountingDaoManager {
   final _$AccountingDaoMixin _db;
   AccountingDaoManager(this._db);
+  $$StoresTableTableManager get stores =>
+      $$StoresTableTableManager(_db.attachedDatabase, _db.stores);
   $$UsersTableTableManager get users =>
       $$UsersTableTableManager(_db.attachedDatabase, _db.users);
   $$MonthlyAccountingTableTableManager get monthlyAccounting =>

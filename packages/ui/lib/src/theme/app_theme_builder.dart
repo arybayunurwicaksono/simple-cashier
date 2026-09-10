@@ -40,6 +40,11 @@ class AppThemeBuilder {
           side: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
         ),
       ),
+      dialogTheme: const DialogThemeData(
+        backgroundColor: Colors.white,
+        insetPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppThemeTokens.light.surface,
@@ -103,6 +108,8 @@ class AppThemeBuilder {
       ),
       dialogTheme: const DialogThemeData(
         backgroundColor: Color(0xFF1E293B),
+        insetPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,

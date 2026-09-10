@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:core/core.dart';
+import 'package:database/database.dart';
 import 'package:ui/ui.dart';
 import '../../di/injection.dart';
 import '../../stores/accounting_store.dart';
 import '../../stores/auth_store.dart';
 import '../../stores/settings_store.dart';
+import '../../stores/store_store.dart';
 import '../catalog/product_form_screen.dart';
 import '../balance/balance_log_dialog.dart';
 import '../transactions/transaction_detail_screen.dart';
@@ -32,6 +34,11 @@ class _HomeScreenState extends State<HomeScreen> {
   final _accountingStore = getIt<AccountingStore>();
   final _authStore = getIt<AuthStore>();
   final _settingsStore = getIt<SettingsStore>();
+  final _analyticsDao = getIt<AnalyticsDao>();
+
+  RevenueMixSummary? _weeklyRevenueMix;
+  double _weeklyGrowthPercentage = 0.0;
+  bool _isLoadingRevenue = true;
 
   @override
   void initState() {
@@ -40,14 +47,53 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _refreshData() async {
-    await _settingsStore.loadSettings();
-    await _accountingStore.loadLedgers();
+    await Future.wait([
+      _settingsStore.loadSettings(),
+      _accountingStore.loadLedgers(),
+      _loadWeeklyRevenue(),
+    ]);
+  }
+
+  Future<void> _loadWeeklyRevenue() async {
+    try {
+      final now = DateTime.now();
+      final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59);
+      final startDate = DateTime(now.year, now.month, now.day, 0, 0, 0).subtract(const Duration(days: 6));
+      final prevEndDate = startDate.subtract(const Duration(seconds: 1));
+      final prevStartDate = prevEndDate.subtract(const Duration(days: 6));
+
+      final results = await Future.wait([
+        _analyticsDao.getRevenueMix(
+          startDate: startDate,
+          endDate: endDate,
+          interval: 'weekly',
+        ),
+        _analyticsDao.getOverallSummary(
+          startDate: startDate,
+          endDate: endDate,
+          previousStartDate: prevStartDate,
+          previousEndDate: prevEndDate,
+        ),
+      ]);
+
+      if (mounted) {
+        setState(() {
+          _weeklyRevenueMix = results[0] as RevenueMixSummary;
+          _weeklyGrowthPercentage = (results[1] as AnalyticsSummary).profitGrowthPercentage;
+          _isLoadingRevenue = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoadingRevenue = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = _authStore.currentUser;
-    final store = _settingsStore.storeProfile;
     final todayFormatted = DateFormatter.formatFull(DateTime.now());
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -57,14 +103,18 @@ class _HomeScreenState extends State<HomeScreen> {
         titleSpacing: 16,
         title: Observer(
           builder: (_) {
+            final activeStore = getIt<StoreStore>().activeStore;
             final user = _authStore.currentUser;
             final store = _settingsStore.storeProfile;
-            final storeName = (store != null && store.storeName.trim().isNotEmpty)
-                ? store.storeName.trim()
-                : 'Simple Cashier';
-            final cashierName = (user != null && user.fullname.trim().isNotEmpty)
-                ? user.fullname.trim()
-                : 'Admin';
+            final storeName = activeStore?.storeName ??
+                ((store != null && store.storeName.trim().isNotEmpty)
+                    ? store.storeName.trim()
+                    : 'Simple Cashier');
+            final cashierName = (activeStore != null && activeStore.ownerName.trim().isNotEmpty)
+                ? activeStore.ownerName.trim()
+                : ((user != null && user.fullname.trim().isNotEmpty)
+                    ? user.fullname.trim()
+                    : 'Pemilik Toko');
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,83 +172,6 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               children: [
-                // Highlight CTA Banner: Transaksi Baru
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF1E3A8A), Color(0xFF2563EB)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(18),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF1E3A8A).withValues(alpha: 0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Buka Kasir POS',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Mulai input pesanan dan cetak struk belanja pelanggan',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.85),
-                                fontSize: 11.5,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            ElevatedButton.icon(
-                              onPressed: widget.onStartNewTransaction,
-                              icon: const Icon(Icons.point_of_sale_rounded, size: 18, color: Color(0xFF1E3A8A)),
-                              label: const Text(
-                                'Transaksi Baru',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5, color: Color(0xFF1E3A8A)),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: const Color(0xFF1E3A8A),
-                                elevation: 0,
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.shopping_bag_outlined,
-                          color: Colors.white,
-                          size: 36,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 18),
-
                 // Ringkasan Hari Ini Title
                 Row(
                   children: [
@@ -399,6 +372,63 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ],
+                const SizedBox(height: 18),
+
+                // Title: Grafik Penjualan Minggu Ini
+                Row(
+                  children: [
+                    Icon(
+                      Icons.auto_graph_rounded,
+                      size: 18,
+                      color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF1E3A8A),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Grafik Penjualan Minggu ini',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: isDark ? const Color(0xFFF8FAFC) : const Color(0xFF0F172A),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+
+                // 7-day Sales Revenue Mix Chart
+                if (_weeklyRevenueMix != null)
+                  SplineAreaChart(
+                    showHeader: false,
+                    totalRevenue: _weeklyRevenueMix!.totalRevenue,
+                    productRevenue: _weeklyRevenueMix!.productRevenue,
+                    serviceRevenue: _weeklyRevenueMix!.serviceRevenue,
+                    growthPercentage: _weeklyGrowthPercentage,
+                    trendPoints: _weeklyRevenueMix!.trendPoints,
+                  )
+                else if (_isLoadingRevenue)
+                  Container(
+                    height: 200,
+                    decoration: BoxDecoration(
+                      color: AppColors.chartCard(context),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.chartBorder(context),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                else
+                  const SplineAreaChart(
+                    showHeader: false,
+                    totalRevenue: 0,
+                    productRevenue: 0,
+                    serviceRevenue: 0,
+                    growthPercentage: 0.0,
+                    trendPoints: [],
+                  ),
                 const SizedBox(height: 18),
 
                 // Quick Action Shortcuts

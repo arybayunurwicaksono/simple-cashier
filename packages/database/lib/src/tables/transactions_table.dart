@@ -1,9 +1,11 @@
 import 'package:drift/drift.dart';
 import 'users_table.dart';
+import 'stores_table.dart';
 
 @DataClassName('TransactionData')
 class Transactions extends Table {
   IntColumn get id => integer().autoIncrement()();
+  IntColumn get storeId => integer().nullable().references(Stores, #id)();
   TextColumn get invoiceNumber => text().unique()();
   TextColumn get customerName => text().nullable()();
   TextColumn get customerPhone => text().nullable()();

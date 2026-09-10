@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:ui/ui.dart';
 import '../../stores/analytics_store.dart';
 
 class AnalyticsFilterDialog extends StatefulWidget {
@@ -254,11 +255,14 @@ class _AnalyticsFilterDialogState extends State<AnalyticsFilterDialog> {
               Expanded(
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Batal'),
+                  child: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text('Batal', maxLines: 1),
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -268,7 +272,7 @@ class _AnalyticsFilterDialogState extends State<AnalyticsFilterDialog> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: isDark ? AppColors.accentBlue : AppColors.primary,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   onPressed: () async {
@@ -278,7 +282,10 @@ class _AnalyticsFilterDialogState extends State<AnalyticsFilterDialog> {
                     widget.store.timeFilter = _tempFilter;
                     await widget.store.loadAnalytics();
                   },
-                  child: const Text('Terapkan Filter', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text('Terapkan Filter', style: TextStyle(fontWeight: FontWeight.bold), maxLines: 1),
+                  ),
                 ),
               ),
             ],
@@ -310,17 +317,19 @@ class _AnalyticsFilterDialogState extends State<AnalyticsFilterDialog> {
             ),
           ),
           child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected
-                    ? Colors.white
-                    : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected
+                      ? Colors.white
+                      : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+                ),
+                maxLines: 1,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),

@@ -4,6 +4,7 @@ part of 'service_dao.dart';
 
 // ignore_for_file: type=lint
 mixin _$ServiceDaoMixin on DatabaseAccessor<AppDatabase> {
+  $StoresTable get stores => attachedDatabase.stores;
   $CategoriesTable get categories => attachedDatabase.categories;
   $ServicesTable get services => attachedDatabase.services;
   ServiceDaoManager get managers => ServiceDaoManager(this);
@@ -12,6 +13,8 @@ mixin _$ServiceDaoMixin on DatabaseAccessor<AppDatabase> {
 class ServiceDaoManager {
   final _$ServiceDaoMixin _db;
   ServiceDaoManager(this._db);
+  $$StoresTableTableManager get stores =>
+      $$StoresTableTableManager(_db.attachedDatabase, _db.stores);
   $$CategoriesTableTableManager get categories =>
       $$CategoriesTableTableManager(_db.attachedDatabase, _db.categories);
   $$ServicesTableTableManager get services =>

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 import 'package:core/core.dart';
 import '../atoms/app_button.dart';
 
@@ -55,9 +56,10 @@ class ConfirmationDialog extends StatelessWidget {
 
     return Dialog(
       backgroundColor: Theme.of(context).cardColor,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -97,26 +99,52 @@ class ConfirmationDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: AppButton(
-                    label: cancelText,
-                    variant: AppButtonVariant.outline,
-                    height: 40,
-                    onPressed: () => Navigator.of(context).pop(false),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: AppButton(
-                    label: confirmText,
-                    variant: isDanger ? AppButtonVariant.danger : AppButtonVariant.primary,
-                    height: 40,
-                    onPressed: onConfirm,
-                  ),
-                ),
-              ],
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isNarrow = constraints.maxWidth < 240 || (confirmText.length > 13 && constraints.maxWidth < 275);
+                if (isNarrow) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      AppButton(
+                        label: confirmText,
+                        variant: isDanger ? AppButtonVariant.danger : AppButtonVariant.primary,
+                        height: 40,
+                        onPressed: onConfirm,
+                      ),
+                      const SizedBox(height: 8),
+                      AppButton(
+                        label: cancelText,
+                        variant: AppButtonVariant.outline,
+                        height: 40,
+                        onPressed: () => Navigator.of(context).pop(false),
+                      ),
+                    ],
+                  );
+                }
+
+                return Row(
+                  children: [
+                    Expanded(
+                      child: AppButton(
+                        label: cancelText,
+                        variant: AppButtonVariant.outline,
+                        height: 40,
+                        onPressed: () => Navigator.of(context).pop(false),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: AppButton(
+                        label: confirmText,
+                        variant: isDanger ? AppButtonVariant.danger : AppButtonVariant.primary,
+                        height: 40,
+                        onPressed: onConfirm,
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ],
         ),

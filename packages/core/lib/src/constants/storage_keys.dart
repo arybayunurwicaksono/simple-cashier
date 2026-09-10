@@ -7,6 +7,10 @@ class StorageKeys {
   static const String keyAuthToken = 'auth_token';
   static const String keyRefreshToken = 'refresh_token';
 
+  // Multi-Store Keys
+  static const String keyDefaultStoreId = 'default_store_id';
+  static const String keyActiveStoreId = 'active_store_id';
+
   // App Settings Keys
   static const String keyThemeMode = 'theme_mode';
   static const String keySavedPrinterAddress = 'saved_printer_address';

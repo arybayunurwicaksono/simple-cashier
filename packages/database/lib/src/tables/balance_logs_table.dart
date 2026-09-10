@@ -1,9 +1,11 @@
 import 'package:drift/drift.dart';
 import 'users_table.dart';
+import 'stores_table.dart';
 
 @DataClassName('BalanceLogData')
 class BalanceLogs extends Table {
   IntColumn get id => integer().autoIncrement()();
+  IntColumn get storeId => integer().nullable().references(Stores, #id)();
   IntColumn get amount => integer()();
   TextColumn get flowType => text()(); // 'in' | 'out'
   TextColumn get category => text()(); // 'capital' | 'operational' | 'withdrawal' | 'other'

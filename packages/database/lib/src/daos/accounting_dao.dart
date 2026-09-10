@@ -18,18 +18,34 @@ part 'accounting_dao.g.dart';
 class AccountingDao extends DatabaseAccessor<AppDatabase> with _$AccountingDaoMixin {
   AccountingDao(super.db);
 
-  Stream<List<MonthlyAccountingData>> watchAllMonthlyLedgers() =>
-      (select(monthlyAccounting)..orderBy([(tbl) => OrderingTerm.desc(tbl.id)])).watch();
+  Stream<List<MonthlyAccountingData>> watchAllMonthlyLedgers({int? storeId}) {
+    final query = select(monthlyAccounting);
+    if (storeId != null) {
+      query.where((tbl) => tbl.storeId.equals(storeId));
+    }
+    return (query..orderBy([(tbl) => OrderingTerm.desc(tbl.id)])).watch();
+  }
 
-  Future<List<MonthlyAccountingData>> getAllMonthlyLedgers() =>
-      (select(monthlyAccounting)..orderBy([(tbl) => OrderingTerm.desc(tbl.id)])).get();
+  Future<List<MonthlyAccountingData>> getAllMonthlyLedgers({int? storeId}) {
+    final query = select(monthlyAccounting);
+    if (storeId != null) {
+      query.where((tbl) => tbl.storeId.equals(storeId));
+    }
+    return (query..orderBy([(tbl) => OrderingTerm.desc(tbl.id)])).get();
+  }
 
-  Future<MonthlyAccountingData?> getLedgerByPeriod(String period) =>
-      (select(monthlyAccounting)..where((tbl) => tbl.periodMonthYear.equals(period)))
-          .getSingleOrNull();
+  Future<MonthlyAccountingData?> getLedgerByPeriod(String period, {int? storeId}) {
+    final query = select(monthlyAccounting)
+      ..where((tbl) => tbl.periodMonthYear.equals(period));
+    if (storeId != null) {
+      query.where((tbl) => tbl.storeId.equals(storeId));
+    }
+    return query.getSingleOrNull();
+  }
 
-  Future<int> insertOrUpdateLedger(MonthlyAccountingCompanion ledger) async {
-    final existing = await getLedgerByPeriod(ledger.periodMonthYear.value);
+  Future<int> insertOrUpdateLedger(MonthlyAccountingCompanion ledger, {int? storeId}) async {
+    final targetStoreId = storeId ?? ledger.storeId.value;
+    final existing = await getLedgerByPeriod(ledger.periodMonthYear.value, storeId: targetStoreId);
     if (existing != null) {
       return (update(monthlyAccounting)
             ..where((tbl) => tbl.id.equals(existing.id)))
@@ -43,10 +59,14 @@ class AccountingDao extends DatabaseAccessor<AppDatabase> with _$AccountingDaoMi
   Future<Map<String, int>> calculatePeriodAggregation({
     required DateTime startDate,
     required DateTime endDate,
+    int? storeId,
   }) async {
-    final txList = await (select(transactions)
-          ..where((tbl) => tbl.createdAt.isBetweenValues(startDate, endDate)))
-        .get();
+    final txQuery = select(transactions)
+      ..where((tbl) => tbl.createdAt.isBetweenValues(startDate, endDate));
+    if (storeId != null) {
+      txQuery.where((tbl) => tbl.storeId.equals(storeId));
+    }
+    final txList = await txQuery.get();
 
     int incomeGoods = 0;
     int incomeServices = 0;
@@ -66,11 +86,14 @@ class AccountingDao extends DatabaseAccessor<AppDatabase> with _$AccountingDaoMi
       }
     }
 
-    final balanceOutLogs = await (select(balanceLogs)
-          ..where((tbl) =>
-              tbl.createdAt.isBetweenValues(startDate, endDate) &
-              tbl.flowType.equals('out')))
-        .get();
+    final balanceQuery = select(balanceLogs)
+      ..where((tbl) =>
+          tbl.createdAt.isBetweenValues(startDate, endDate) &
+          tbl.flowType.equals('out'));
+    if (storeId != null) {
+      balanceQuery.where((tbl) => tbl.storeId.equals(storeId));
+    }
+    final balanceOutLogs = await balanceQuery.get();
 
     int totalExpense = balanceOutLogs.fold(0, (sum, log) => sum + log.amount);
     int totalIncome = incomeGoods + incomeServices;

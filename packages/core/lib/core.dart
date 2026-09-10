@@ -1,7 +1,6 @@
 library core;
 
 // Constants
-export 'src/constants/app_colors.dart';
 export 'src/constants/app_dimensions.dart';
 export 'src/constants/app_strings.dart';
 export 'src/constants/storage_keys.dart';

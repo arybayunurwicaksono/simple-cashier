@@ -5,9 +5,17 @@ import 'package:ui/ui.dart';
 import '../../di/injection.dart';
 import '../../stores/auth_store.dart';
 import '../dashboard_screen.dart';
+import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  final bool isInitialOwnerSetup;
+  final String? initialFullname;
+
+  const RegisterScreen({
+    super.key,
+    this.isInitialOwnerSetup = false,
+    this.initialFullname,
+  });
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -15,12 +23,19 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _fullnameController = TextEditingController();
+  late final TextEditingController _fullnameController;
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  String _selectedRole = 'owner';
+  late String _selectedRole;
   final _authStore = getIt<AuthStore>();
+
+  @override
+  void initState() {
+    super.initState();
+    _fullnameController = TextEditingController(text: widget.initialFullname ?? '');
+    _selectedRole = widget.isInitialOwnerSetup ? 'owner' : 'owner';
+  }
 
   @override
   void dispose() {
@@ -44,6 +59,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (!mounted) return;
 
       if (success) {
+        AppNotification.showSuccess(
+          context,
+          widget.isInitialOwnerSetup
+              ? 'Akun Pemilik berhasil dibuat! Selamat datang di aplikasi.'
+              : 'Pendaftaran akun berhasil!',
+        );
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const DashboardScreen()),
           (route) => false,
@@ -59,9 +80,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return PopScope(
+      canPop: !widget.isInitialOwnerSetup,
+      child: Scaffold(
       appBar: AppBar(
-        title: const Text(AppStrings.registerTitle),
+        title: Text(
+          widget.isInitialOwnerSetup ? 'Registrasi Akun Pemilik' : AppStrings.registerTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        automaticallyImplyLeading: !widget.isInitialOwnerSetup,
         elevation: 0,
       ),
       body: SafeArea(
@@ -73,6 +102,55 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  if (widget.isInitialOwnerSetup) ...[
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF064E3B).withValues(alpha: 0.3) : const Color(0xFFECFDF5),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF047857) : const Color(0xFFA7F3D0),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF059669).withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.verified_user_rounded, color: Color(0xFF059669), size: 22),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Setup Akun Pemilik (Owner)',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: Color(0xFF059669),
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Toko berhasil dibuat! Silakan buat akun login pemilik untuk mengelola toko Anda.',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -116,40 +194,78 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           validator: (v) => FormValidators.password(v, 6),
                         ),
                         const SizedBox(height: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              AppStrings.role,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textSecondary(context),
+                        if (widget.isInitialOwnerSetup) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: const Color(0xFF059669).withValues(alpha: 0.5),
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            DropdownButtonFormField<String>(
-                              initialValue: _selectedRole,
-                              decoration: const InputDecoration(
-                                prefixIcon: Icon(Icons.security_outlined),
-                              ),
-                              dropdownColor: Theme.of(context).cardColor,
-                              items: const [
-                                DropdownMenuItem(value: 'owner', child: Text('Pemilik Toko (Full Akses)')),
-                                DropdownMenuItem(value: 'cashier', child: Text('Karyawan / Kasir (POS & Transaksi)')),
+                            child: const Row(
+                              children: [
+                                Icon(Icons.shield_rounded, color: Color(0xFF059669), size: 20),
+                                SizedBox(width: 8),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Peran: Pemilik Toko (Owner)',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          color: Color(0xFF059669),
+                                        ),
+                                      ),
+                                      Text(
+                                        'Akses penuh manajemen toko, karyawan, dan laporan',
+                                        style: TextStyle(fontSize: 10.5, color: Color(0xFF64748B)),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ],
-                              onChanged: (val) {
-                                if (val != null) setState(() => _selectedRole = val);
-                              },
                             ),
-                          ],
-                        ),
+                          ),
+                        ] else ...[
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                AppStrings.role,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textSecondary(context),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              DropdownButtonFormField<String>(
+                                initialValue: _selectedRole,
+                                decoration: const InputDecoration(
+                                  prefixIcon: Icon(Icons.security_outlined),
+                                ),
+                                dropdownColor: Theme.of(context).cardColor,
+                                items: const [
+                                  DropdownMenuItem(value: 'owner', child: Text('Pemilik Toko (Full Akses)')),
+                                  DropdownMenuItem(value: 'cashier', child: Text('Karyawan / Kasir (POS & Transaksi)')),
+                                ],
+                                onChanged: (val) {
+                                  if (val != null) setState(() => _selectedRole = val);
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
                         const SizedBox(height: 20),
                         Observer(
                           builder: (_) => AppButton(
-                            label: AppStrings.signUp,
+                            label: widget.isInitialOwnerSetup ? 'Buat Akun & Masuk ke Toko' : AppStrings.signUp,
                             width: double.infinity,
-                            height: 42,
+                            height: 44,
                             isLoading: _authStore.isLoading,
                             onPressed: _handleRegister,
                           ),
@@ -162,14 +278,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Sudah memiliki akun? ',
+                        widget.isInitialOwnerSetup ? 'Sudah pernah membuat akun? ' : 'Sudah memiliki akun? ',
                         style: TextStyle(
                           fontSize: 13,
                           color: AppColors.textSecondary(context),
                         ),
                       ),
                       TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: () {
+                          if (widget.isInitialOwnerSetup) {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const LoginScreen()),
+                            );
+                          } else {
+                            Navigator.of(context).pop();
+                          }
+                        },
                         child: Text(
                           AppStrings.signIn,
                           style: TextStyle(
@@ -186,6 +310,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

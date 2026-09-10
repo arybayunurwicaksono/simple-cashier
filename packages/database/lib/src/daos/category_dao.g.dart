@@ -4,6 +4,7 @@ part of 'category_dao.dart';
 
 // ignore_for_file: type=lint
 mixin _$CategoryDaoMixin on DatabaseAccessor<AppDatabase> {
+  $StoresTable get stores => attachedDatabase.stores;
   $CategoriesTable get categories => attachedDatabase.categories;
   CategoryDaoManager get managers => CategoryDaoManager(this);
 }
@@ -11,6 +12,8 @@ mixin _$CategoryDaoMixin on DatabaseAccessor<AppDatabase> {
 class CategoryDaoManager {
   final _$CategoryDaoMixin _db;
   CategoryDaoManager(this._db);
+  $$StoresTableTableManager get stores =>
+      $$StoresTableTableManager(_db.attachedDatabase, _db.stores);
   $$CategoriesTableTableManager get categories =>
       $$CategoriesTableTableManager(_db.attachedDatabase, _db.categories);
 }

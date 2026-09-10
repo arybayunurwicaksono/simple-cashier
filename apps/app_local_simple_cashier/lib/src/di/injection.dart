@@ -12,6 +12,8 @@ import '../stores/accounting_store.dart';
 import '../stores/settings_store.dart';
 import '../stores/backup_store.dart';
 import '../stores/analytics_store.dart';
+import '../stores/store_store.dart';
+import '../stores/employee_store.dart';
 
 final getIt = GetIt.instance;
 
@@ -31,6 +33,7 @@ Future<void> configureDependencies() async {
   getIt.registerSingleton<AppDatabase>(db);
   getIt.registerLazySingleton<UserDao>(() => db.userDao);
   getIt.registerLazySingleton<StoreProfileDao>(() => db.storeProfileDao);
+  getIt.registerLazySingleton<StoreDao>(() => db.storeDao);
   getIt.registerLazySingleton<CategoryDao>(() => db.categoryDao);
   getIt.registerLazySingleton<ProductDao>(() => db.productDao);
   getIt.registerLazySingleton<ServiceDao>(() => db.serviceDao);
@@ -41,6 +44,12 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<AnalyticsDao>(() => db.analyticsDao);
 
   // 3. MobX Stores
+  getIt.registerLazySingleton<StoreStore>(
+    () => StoreStore(
+      storeDao: getIt<StoreDao>(),
+      secureStorage: getIt<SecureStorageService>(),
+    ),
+  );
   getIt.registerLazySingleton<AuthStore>(
     () => AuthStore(
       userDao: getIt<UserDao>(),
@@ -107,6 +116,15 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<AnalyticsStore>(
     () => AnalyticsStore(
       getIt<AnalyticsDao>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<EmployeeStore>(
+    () => EmployeeStore(
+      userDao: getIt<UserDao>(),
+      transactionDao: getIt<TransactionDao>(),
+      productDao: getIt<ProductDao>(),
+      balanceDao: getIt<BalanceDao>(),
     ),
   );
 }

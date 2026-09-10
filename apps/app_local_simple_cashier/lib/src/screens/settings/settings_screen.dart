@@ -5,6 +5,7 @@ import '../../di/injection.dart';
 import '../../stores/auth_store.dart';
 import '../../stores/settings_store.dart';
 import '../auth/login_screen.dart';
+import '../backup/backup_restore_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -186,7 +187,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildPrinterSection(isDark),
               const SizedBox(height: 16),
 
-              // Section 5: Store Profile Form
+              // Section 5: Backup & Restore Data Section
+              _buildBackupRestoreSection(isDark),
+              const SizedBox(height: 16),
+
+              // Section 6: Store Profile Form
               _buildStoreProfileSection(isDark),
               const SizedBox(height: 24),
             ],
@@ -644,6 +649,122 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             }),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBackupRestoreSection(bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.settings_backup_restore_rounded,
+                color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF0F766E),
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Backup & Restore Data',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.5,
+                    color: isDark ? const Color(0xFFF8FAFC) : const Color(0xFF0F172A),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Amankan data transaksi, produk, dan laporan toko dengan mengekspor file cadangan (.json) atau memulihkan data dari file cadangan sebelumnya.',
+            style: TextStyle(
+              fontSize: 11,
+              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 12),
+          InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const BackupRestoreScreen()),
+              );
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF042F2E) : const Color(0xFFF0FDFA),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF115E59) : const Color(0xFF99F6E4),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F766E).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.cloud_sync_rounded,
+                      color: Color(0xFF0D9488),
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Kelola Backup & Restore',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12.5,
+                            color: isDark ? const Color(0xFF5EEAD4) : const Color(0xFF0F766E),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Ekspor file cadangan atau pulihkan database',
+                          style: TextStyle(
+                            fontSize: 10.5,
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: isDark ? const Color(0xFF5EEAD4) : const Color(0xFF0F766E),
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

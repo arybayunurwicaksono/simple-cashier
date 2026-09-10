@@ -1,10 +1,12 @@
 import 'package:drift/drift.dart';
 import 'users_table.dart';
+import 'stores_table.dart';
 
 @DataClassName('MonthlyAccountingData')
 class MonthlyAccounting extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get periodMonthYear => text().unique()(); // e.g. "Agustus 2026"
+  IntColumn get storeId => integer().nullable().references(Stores, #id)();
+  TextColumn get periodMonthYear => text()(); // e.g. "Agustus 2026"
   IntColumn get initialCash => integer().withDefault(const Constant(0))();
   IntColumn get initialDigital => integer().withDefault(const Constant(0))();
   IntColumn get initialStockValue => integer().withDefault(const Constant(0))();
@@ -18,4 +20,9 @@ class MonthlyAccounting extends Table {
   TextColumn get status => text().withDefault(const Constant('on_progress'))(); // 'on_progress' | 'closed'
   IntColumn get closedByUserId => integer().nullable().references(Users, #id)();
   DateTimeColumn get closedAt => dateTime().nullable()();
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+        {storeId, periodMonthYear},
+      ];
 }

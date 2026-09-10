@@ -6,6 +6,7 @@ part of 'backup_dao.dart';
 mixin _$BackupDaoMixin on DatabaseAccessor<AppDatabase> {
   $StoreProfilesTable get storeProfiles => attachedDatabase.storeProfiles;
   $UsersTable get users => attachedDatabase.users;
+  $StoresTable get stores => attachedDatabase.stores;
   $CategoriesTable get categories => attachedDatabase.categories;
   $ProductsTable get products => attachedDatabase.products;
   $ServicesTable get services => attachedDatabase.services;
@@ -27,6 +28,8 @@ class BackupDaoManager {
       $$StoreProfilesTableTableManager(_db.attachedDatabase, _db.storeProfiles);
   $$UsersTableTableManager get users =>
       $$UsersTableTableManager(_db.attachedDatabase, _db.users);
+  $$StoresTableTableManager get stores =>
+      $$StoresTableTableManager(_db.attachedDatabase, _db.stores);
   $$CategoriesTableTableManager get categories =>
       $$CategoriesTableTableManager(_db.attachedDatabase, _db.categories);
   $$ProductsTableTableManager get products =>

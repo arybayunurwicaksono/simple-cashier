@@ -1,9 +1,11 @@
 import 'package:drift/drift.dart';
 import 'categories_table.dart';
+import 'stores_table.dart';
 
 @DataClassName('ProductData')
 class Products extends Table {
   IntColumn get id => integer().autoIncrement()();
+  IntColumn get storeId => integer().nullable().references(Stores, #id)();
   TextColumn get sku => text().nullable()();
   TextColumn get name => text()();
   IntColumn get categoryId => integer().nullable().references(Categories, #id)();

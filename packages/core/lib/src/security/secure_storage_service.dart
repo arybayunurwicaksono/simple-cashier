@@ -58,6 +58,32 @@ class SecureStorageService {
     return _storage.read(key: StorageKeys.keyAuthToken);
   }
 
+  Future<void> setDefaultStoreId(int? storeId) async {
+    if (storeId != null) {
+      await _storage.write(key: StorageKeys.keyDefaultStoreId, value: storeId.toString());
+    } else {
+      await _storage.delete(key: StorageKeys.keyDefaultStoreId);
+    }
+  }
+
+  Future<int?> getDefaultStoreId() async {
+    final val = await _storage.read(key: StorageKeys.keyDefaultStoreId);
+    return val != null ? int.tryParse(val) : null;
+  }
+
+  Future<void> setActiveStoreId(int? storeId) async {
+    if (storeId != null) {
+      await _storage.write(key: StorageKeys.keyActiveStoreId, value: storeId.toString());
+    } else {
+      await _storage.delete(key: StorageKeys.keyActiveStoreId);
+    }
+  }
+
+  Future<int?> getActiveStoreId() async {
+    final val = await _storage.read(key: StorageKeys.keyActiveStoreId);
+    return val != null ? int.tryParse(val) : null;
+  }
+
   Future<void> clearSession() async {
     await _storage.delete(key: StorageKeys.keyActiveUserId);
     await _storage.delete(key: StorageKeys.keyActiveUsername);
@@ -66,5 +92,6 @@ class SecureStorageService {
     await _storage.delete(key: StorageKeys.keyIsLoggedIn);
     await _storage.delete(key: StorageKeys.keyAuthToken);
     await _storage.delete(key: StorageKeys.keyRefreshToken);
+    await _storage.delete(key: StorageKeys.keyActiveStoreId);
   }
 }

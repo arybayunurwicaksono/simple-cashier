@@ -80,6 +80,7 @@ class _RestockDialogState extends State<RestockDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Theme.of(context).cardColor,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(18),
@@ -124,26 +125,51 @@ class _RestockDialogState extends State<RestockDialog> {
                 controller: _notesController,
               ),
               const SizedBox(height: 18),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppButton(
-                      label: 'Batal',
-                      variant: AppButtonVariant.outline,
-                      height: 40,
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: AppButton(
-                      label: 'Simpan',
-                      variant: AppButtonVariant.secondary,
-                      height: 40,
-                      onPressed: _handleRestock,
-                    ),
-                  ),
-                ],
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isNarrow = constraints.maxWidth < 220;
+                  if (isNarrow) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        AppButton(
+                          label: 'Simpan',
+                          variant: AppButtonVariant.secondary,
+                          height: 40,
+                          onPressed: _handleRestock,
+                        ),
+                        const SizedBox(height: 8),
+                        AppButton(
+                          label: 'Batal',
+                          variant: AppButtonVariant.outline,
+                          height: 40,
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    );
+                  }
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: AppButton(
+                          label: 'Batal',
+                          variant: AppButtonVariant.outline,
+                          height: 40,
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: AppButton(
+                          label: 'Simpan',
+                          variant: AppButtonVariant.secondary,
+                          height: 40,
+                          onPressed: _handleRestock,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ],
           ),

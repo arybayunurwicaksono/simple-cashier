@@ -6,9 +6,10 @@ import '../../di/injection.dart';
 import '../../stores/auth_store.dart';
 import '../../stores/settings_store.dart';
 import '../settings/settings_screen.dart';
-import '../auth/login_screen.dart';
-import '../backup/backup_restore_screen.dart';
 import '../catalog/catalog_management_screen.dart';
+import '../store/store_selection_screen.dart';
+import '../employee/employee_management_screen.dart';
+import '../../stores/store_store.dart';
 
 class AppEndDrawer extends StatelessWidget {
   const AppEndDrawer({super.key});
@@ -136,7 +137,7 @@ class AppEndDrawer extends StatelessWidget {
                   _buildDrawerGradientCard(
                     context: context,
                     title: 'Pengaturan Aplikasi',
-                    subtitle: 'Tema (Dark/Light), bahasa & sistem',
+                    subtitle: 'Printer, backup data, tema & sistem',
                     icon: Icons.settings_rounded,
                     gradientColors: const [Color(0xFF4F46E5), Color(0xFF7C3AED)],
                     onTap: () {
@@ -148,28 +149,39 @@ class AppEndDrawer extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
 
-                  // 2. Printer Thermal Card
+                  // Ganti Toko Card
                   _buildDrawerGradientCard(
                     context: context,
-                    title: 'Printer Thermal Bluetooth',
-                    subtitle: 'Scan & sambungkan printer nota',
-                    icon: Icons.print_rounded,
-                    gradientColors: const [Color(0xFF1E3A8A), Color(0xFF3B82F6)],
+                    title: 'Ganti Toko / Beralih Usaha',
+                    subtitle: 'Beralih ke toko atau cabang lain',
+                    icon: Icons.swap_horiz_rounded,
+                    gradientColors: const [Color(0xFF0D9488), Color(0xFF14B8A6)],
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                      ConfirmationDialog.show(
+                        context,
+                        title: 'Ganti Toko?',
+                        message: 'Sesi toko saat ini akan ditutup dan Anda akan kembali ke daftar pilihan toko.',
+                        onConfirm: () async {
+                          final nav = Navigator.of(context);
+                          final storeStore = getIt<StoreStore>();
+                          await storeStore.switchStore();
+                          nav.pushAndRemoveUntil(
+                            MaterialPageRoute(builder: (_) => const StoreSelectionScreen()),
+                            (route) => false,
+                          );
+                        },
                       );
                     },
                   ),
                   const SizedBox(height: 10),
 
-                  // 3. Multi-Cashier & Staff Management Card
+                  // 2. Multi-Cashier & Staff Management Card
                   _buildDrawerGradientCard(
                     context: context,
-                    title: 'Manajemen Kasir & Staf',
+                    title: 'Manajemen Akun & Log Karyawan',
                     subtitle: authStore.isOwner
-                        ? 'Kelola akun & hak akses pengguna'
+                        ? 'Kelola akun kasir & pantau log aktivitas'
                         : 'Khusus Akun Pemilik (Owner)',
                     icon: Icons.people_alt_rounded,
                     gradientColors: authStore.isOwner
@@ -188,9 +200,8 @@ class AppEndDrawer extends StatelessWidget {
                     onTap: () {
                       Navigator.pop(context);
                       if (authStore.isOwner) {
-                        AppNotification.showInfo(
-                          context,
-                          'Menu manajemen staf kasir aktif',
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const EmployeeManagementScreen()),
                         );
                       } else {
                         AppNotification.showError(
@@ -198,22 +209,6 @@ class AppEndDrawer extends StatelessWidget {
                           'Akses ditolak: Hanya Pemilik Toko yang dapat mengelola kasir & staf.',
                         );
                       }
-                    },
-                  ),
-                  const SizedBox(height: 10),
-
-                  // 4. Backup & Restore Data Card
-                  _buildDrawerGradientCard(
-                    context: context,
-                    title: 'Backup & Restore Data',
-                    subtitle: 'Ekspor & Impor database toko (.json)',
-                    icon: Icons.settings_backup_restore_rounded,
-                    gradientColors: const [Color(0xFF0F766E), Color(0xFF14B8A6)],
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const BackupRestoreScreen()),
-                      );
                     },
                   ),
                   const SizedBox(height: 10),
@@ -255,14 +250,16 @@ class AppEndDrawer extends StatelessWidget {
                 onTap: () {
                   ConfirmationDialog.show(
                     context,
-                    title: 'Keluar Akun?',
-                    message: 'Anda akan keluar dari sesi kasir aktif.',
+                    title: 'Tutup Sesi Toko?',
+                    message: 'Anda akan keluar dari sesi toko aktif dan kembali ke daftar pilihan toko.',
                     isDanger: true,
                     onConfirm: () async {
                       final nav = Navigator.of(context);
+                      final storeStore = getIt<StoreStore>();
+                      await storeStore.switchStore();
                       await authStore.logout();
                       nav.pushAndRemoveUntil(
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                        MaterialPageRoute(builder: (_) => const StoreSelectionScreen()),
                         (route) => false,
                       );
                     },
@@ -279,10 +276,10 @@ class AppEndDrawer extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.logout_rounded, color: isDark ? AppColors.errorDark : AppColors.error, size: 18),
+                      Icon(Icons.store_rounded, color: isDark ? AppColors.errorDark : AppColors.error, size: 18),
                       const SizedBox(width: 8),
                       Text(
-                        'Keluar Akun (Logout)',
+                        'Keluar Sesi Toko',
                         style: TextStyle(
                           color: isDark ? AppColors.errorDark : AppColors.error,
                           fontWeight: FontWeight.bold,
@@ -392,7 +389,9 @@ class AppEndDrawer extends StatelessWidget {
           children: [
             Icon(Icons.menu_book_rounded, color: AppColors.primaryAccent(context)),
             const SizedBox(width: 8),
-            const Text('Panduan Kasir', style: TextStyle(fontSize: 16)),
+            const Expanded(
+              child: Text('Panduan Kasir', style: TextStyle(fontSize: 16), overflow: TextOverflow.ellipsis),
+            ),
           ],
         ),
         content: const SingleChildScrollView(
@@ -427,7 +426,9 @@ class AppEndDrawer extends StatelessWidget {
           children: [
             Icon(Icons.store_rounded, color: AppColors.primaryAccent(context)),
             const SizedBox(width: 8),
-            const Text('Simple Cashier', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Expanded(
+              child: Text('Simple Cashier', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+            ),
           ],
         ),
         content: Column(
